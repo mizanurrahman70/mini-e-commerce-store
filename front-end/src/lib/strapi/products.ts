@@ -1,12 +1,10 @@
-// Product data-access functions. Every function returns a consistent
-// `{ data, error }` shape.
+
 import { strapiFetch } from "./client";
 import type { ApiResult, PaginationMeta, Product, StrapiData } from "../types";
 
-/** A product together with its Strapi id (needed for cart + edit links). */
+
 export type ProductWithId = Product;
 
-/** Filters accepted by getProducts, mirroring the Strapi query API. */
 export interface ProductFilters {
   categorySlug?: string;
   isActive?: boolean;
@@ -64,10 +62,7 @@ export async function getProducts(
   };
 }
 
-/**
- * Fetch a single product by its slug. The backend Product type has no own
- * `slug` field, so we resolve it by matching a slugified `name`.
- */
+
 export async function getProductBySlug(slug: string): Promise<ApiResult<Product>> {
   const query = {
     populate: {
@@ -114,7 +109,7 @@ export async function createProduct(
   return { data: res.body.data, error: null };
 }
 
-/** PUT /api/products/:id — update a product (vendor own / admin). Sends the JWT. */
+
 export async function updateProduct(
   id: number,
   data: Record<string, unknown>,

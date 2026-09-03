@@ -1,5 +1,4 @@
-// Responsive product grid. Renders a list of ProductCards in a mobile-first,
-// single-column-collapsing grid.
+
 
 import { ProductCard } from "@/components/products/ProductCard";
 import type { ProductWithId } from "@/lib/strapi/products";

@@ -1,16 +1,34 @@
-// Homepage: hero + product grid.
+// Homepage: hero + product catalog.
 //
-// Server Component that fetches products from Strapi. If Strapi is unreachable
-// the strapiFetch layer returns an error string, which we surface as a friendly
-// "service unavailable" message instead of a stack trace.
+// Server Component. Reads URL search params (?q=, ?sort=, ?page=) to drive
+// search, sorting and pagination server-side (shareable/bookmarkable URLs). If
+// Strapi is unreachable the strapiFetch layer returns an error string, which we
+// surface as a friendly "service unavailable" message instead of a stack trace.
 
+import { Suspense } from "react";
 import { getProducts } from "@/lib/strapi/products";
 import { ProductGrid } from "@/components/products/ProductGrid";
+import { ProductTools } from "@/components/products/ProductTools";
+import { Pagination } from "@/components/products/Pagination";
 import { ProductGridSkeleton } from "@/components/ui/Skeleton";
-import { Suspense } from "react";
+import type { SearchParams } from "@/lib/catalog";
+import { readParam, sortToStrapi } from "@/lib/catalog";
 
-async function ProductSection() {
-  const result = await getProducts({ pageSize: 12, isActive: true });
+const PAGE_SIZE = 12;
+
+async function ProductSection({ params }: { params: SearchParams }) {
+  const q = readParam(params, "q");
+  const sort = sortToStrapi(readParam(params, "sort"));
+  const rawPage = Number(readParam(params, "page"));
+  const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+
+  const result = await getProducts({
+    page,
+    pageSize: PAGE_SIZE,
+    isActive: true,
+    search: q,
+    sort,
+  });
 
   if (result.error) {
     return (
@@ -25,18 +43,48 @@ async function ProductSection() {
     );
   }
 
-  if (!result.data || result.data.products.length === 0) {
+  const products = result.data?.products ?? [];
+  const meta = result.data?.meta?.pagination;
+  const total = meta?.total ?? products.length;
+  const pageCount = meta?.pageCount ?? 1;
+
+  if (products.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
-        No products available yet. Check back soon!
+      <div className="space-y-6">
+        <ProductTools />
+        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
+          {q ? (
+            <>
+              No products match{" "}
+              <span className="font-medium text-gray-700">&quot;{q}&quot;</span>.
+            </>
+          ) : (
+            "No products available yet. Check back soon!"
+          )}
+        </div>
       </div>
     );
   }
 
-  return <ProductGrid products={result.data.products} />;
+  return (
+    <div className="space-y-6">
+      <ProductTools />
+      {q && (
+        <p className="text-sm text-gray-500">
+          Showing results for <span className="font-medium text-gray-700">&quot;{q}&quot;</span>
+        </p>
+      )}
+      <ProductGrid products={products} />
+      <Pagination params={params} page={page} pageCount={pageCount} total={total} />
+    </div>
+  );
 }
 
-export default function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: PageProps<"/">) {
+  const params = await searchParams;
+
   return (
     <div>
       {/* Hero */}
@@ -68,7 +116,7 @@ export default function HomePage() {
           </div>
         </div>
         <Suspense fallback={<ProductGridSkeleton count={8} />}>
-          <ProductSection />
+          <ProductSection params={params} />
         </Suspense>
       </section>
     </div>

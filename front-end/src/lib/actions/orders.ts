@@ -1,8 +1,6 @@
 "use server";
 
-// Server Actions for order mutations. The Strapi JWT lives in an httpOnly
-// cookie (inaccessible to the client), so these actions read it here on the
-// server and attach it as the Authorization header before calling Strapi.
+
 
 import { revalidatePath } from "next/cache";
 import {

@@ -1,7 +1,5 @@
 "use client";
 
-// Add to cart button for the product detail page. Uses the cart context so the
-// header cart badge updates immediately.
 
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
