@@ -1,14 +1,19 @@
-// proxy.ts (Next.js 16, replaces the old middleware.ts).
-// Guards /vendor/* and /admin/* by role using the shared permission rules and
-// the companion `strapi_role` cookie. UX convenience only — Strapi enforces
-// real authorization (Settings > Roles).
+
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { AUTH_COOKIE, ROLE_COOKIE } from "@/lib/cookies";
-import { can } from "@/lib/permission-rules";
+import {
+  canByPermissions,
+  normalizeRolePermissions,
+  type Resource,
+  type Action,
+  type RolePermissionsMap,
+} from "@/lib/permission-rules";
 
-export function proxy(request: NextRequest) {
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL ?? "http://localhost:1337";
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isVendorArea = pathname.startsWith("/vendor/");
@@ -18,21 +23,21 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const hasJwt = request.cookies.has(AUTH_COOKIE);
+  const jwt = request.cookies.get(AUTH_COOKIE)?.value;
   const role = request.cookies.get(ROLE_COOKIE)?.value;
 
-  if (!hasJwt) {
+  if (!jwt) {
     const url = new URL("/login", request.url);
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }
 
-  let allowed: boolean;
-  if (isAdminArea) {
-    allowed = can(role, "user", "read");
-  } else {
-    allowed = can(role, "product", "create");
-  }
+  // Admin area -> "can read users" (only admins have it). Vendor area ->
+  // "can create products" (vendors + admins). Both resolved from the user's
+  // live Strapi permissions when reachable.
+  const allowed = isAdminArea
+    ? await gate(jwt, role, "user", "read")
+    : await gate(jwt, role, "product", "create");
 
   if (!allowed) {
     return NextResponse.redirect(new URL("/", request.url));
@@ -44,3 +49,33 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: ["/vendor/:path*", "/admin/:path*"],
 };
+
+/**
+ * Resolve the user's real permissions from Strapi (GET /users/me) and check the
+ * action against them. When the backend is unreachable or returns no
+ * permissions, the route is DENIED (fail closed) — there is no static fallback.
+ */
+async function gate(
+  jwt: string,
+  _role: string | undefined,
+  resource: Resource,
+  action: Action
+): Promise<boolean> {
+  const permissions = await loadUserPermissions(jwt);
+  return canByPermissions(permissions ?? [], resource, action);
+}
+
+async function loadUserPermissions(jwt: string): Promise<string[] | null> {
+  try {
+    const res = await fetch(`${STRAPI_URL}/api/users/me`, {
+      headers: { Authorization: `Bearer ${jwt}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { permissions?: RolePermissionsMap };
+    const raw = body?.permissions;
+    return raw ? normalizeRolePermissions(raw) : null;
+  } catch {
+    return null;
+  }
+}

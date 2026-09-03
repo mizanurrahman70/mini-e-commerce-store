@@ -1,58 +1,7 @@
-// Role permission rules, framework-agnostic (safe for server + client + proxy).
+
 
 export type Resource = "product" | "order" | "review" | "user" | "category";
 export type Action = string;
-
-// Static fallback map: role -> allowed actions per resource. The real source
-// of truth is Strapi's Settings > Roles; this is only used as a fallback or
-// when backend permissions aren't available.
-export const PERMISSIONS: Record<Resource, Record<string, Action[]>> = {
-  product: {
-    customer: ["read"],
-    vendor: ["read", "create", "update:own"],
-    admin: ["read", "create", "update", "delete"],
-    public: ["read"],
-  },
-  order: {
-    customer: ["read:own", "create"],
-    vendor: ["read:own-products"],
-    admin: ["read", "update", "delete"],
-  },
-  review: {
-    customer: ["create", "read"],
-    vendor: ["read"],
-    admin: ["read", "delete"],
-  },
-  user: {
-    admin: ["read", "update", "delete"],
-  },
-  category: {
-    admin: ["read", "create", "update", "delete"],
-    vendor: ["read"],
-    customer: ["read"],
-    public: ["read"],
-  },
-};
-
-export function can(
-  role: string | null | undefined,
-  resource: Resource,
-  action: Action
-): boolean {
-  if (!role) return false;
-  const perms = PERMISSIONS[resource];
-  if (!perms) return false;
-  if (perms[role]?.includes(action)) return true;
-  // Unknown custom role -> treat as a customer baseline.
-  if (!["authenticated", "customer", "vendor", "admin", "public"].includes(role)) {
-    return (perms["authenticated"] ?? perms["customer"] ?? []).includes(action);
-  }
-  return false;
-}
-
-// ---------------------------------------------------------------------------
-// Backend-driven permissions
-// ---------------------------------------------------------------------------
 
 // Normalize an action name from different Strapi conventions to a canonical one.
 function canonicalAction(name: string): string {
@@ -72,8 +21,7 @@ function canonicalAction(name: string): string {
   }
 }
 
-// Map a Strapi API key + controller to our Resource. Returns null to ignore
-// unrelated plugins (upload, email, i18n, content-type-builder, etc.).
+
 function mapResource(api: string, controller: string): Resource | null {
   if (api === "plugin::users-permissions" && controller === "user") return "user";
   const map: Record<string, Resource> = {
@@ -85,11 +33,7 @@ function mapResource(api: string, controller: string): Resource | null {
   return map[api] ?? null;
 }
 
-/**
- * Convert raw Strapi role permissions (from /users-permissions/roles/:id) into
- * a flat list of `"resource:action"` keys, e.g. ["product:read", "product:create"].
- * Used so the UI honors the REAL backend config rather than a hardcoded map.
- */
+
 export function normalizeRolePermissions(
   raw: RolePermissionsMap | undefined
 ): string[] {
@@ -114,18 +58,13 @@ export interface RolePermissionsMap {
   };
 }
 
-/**
- * Map a frontend action ("read:own", "update:own") to its backend action key.
- */
+
 function toKey(resource: Resource, action: Action): string {
   const base = action.replace(/:own(?:-products)?$/, "");
   return `${resource}:${base}`;
 }
 
-/**
- * Check an action against a list of backend permission keys (from
- * normalizeRolePermissions). True if a matching key is present.
- */
+
 export function canByPermissions(
   permissions: string[] | undefined,
   resource: Resource,
