@@ -1,9 +1,5 @@
 "use client";
 
-// Review submission form shown on the product detail page for logged-in
-// customers. Submits through a server action (which attaches the httpOnly JWT
-// server-side), with inline validation and a success toast.
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";

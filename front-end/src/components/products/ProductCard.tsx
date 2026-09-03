@@ -1,10 +1,5 @@
 "use client";
 
-// Single product card for the shop grid. Links to the product detail page by
-// slug, shows the image, price and category, and offers Add to Cart. The add
-// button uses the permission map only to avoid showing a useless button when a
-// product is out of stock — adding to cart itself is a customer action.
-
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { useCart } from "@/context/CartContext";

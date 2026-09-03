@@ -1,9 +1,5 @@
 "use server";
 
-// Server Actions for product mutations. Reads the httpOnly JWT cookie so the
-// client never handles the token. These respect the role rules defined in
-// lib/permissions.ts for UX only; Strapi enforces the real authorization.
-
 import { revalidatePath } from "next/cache";
 import {
   createProduct as strapiCreateProduct,

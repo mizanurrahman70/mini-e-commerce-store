@@ -1,12 +1,5 @@
 "use client";
 
-// Product management table used by BOTH the vendor dashboard and admin panel.
-//
-// CRUD is gated by the usePermission hook (see lib/permissions.ts):
-//   - "update:own" -> vendor (their own) / admin
-//   - "delete"     -> admin only
-// These checks are UX-only; Strapi enforces the real authorization.
-
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
