@@ -1,0 +1,15 @@
+// Responsive product grid. Renders a list of ProductCards in a mobile-first,
+// single-column-collapsing grid.
+
+import { ProductCard } from "@/components/products/ProductCard";
+import type { ProductWithId } from "@/lib/strapi/products";
+
+export function ProductGrid({ products }: { products: ProductWithId[] }) {
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
