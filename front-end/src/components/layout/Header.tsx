@@ -1,11 +1,5 @@
 "use client";
 
-// Global site header: brand, nav links, cart icon with count, and auth /
-// role-aware action buttons. Rendered once in the root layout.
-//
-// Role-aware links are gated by the usePermission hook (lib/permissions.ts),
-// which ONLY controls the user experience — real security is enforced in
-// Strapi. See that file for the canonical role -> permission map.
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";

@@ -1,10 +1,5 @@
 "use client";
 
-// User profile page. Client component that surfaces the current session:
-// account details, their role, and — built directly from Strapi's per-role
-// permissions — the actions they're allowed to perform. Reads everything from
-// the AuthContext, which is hydrated from GET /api/users/me (enriched with
-// `role` + `permissions` by the backend extension).
 
 import Link from "next/link";
 import { User as UserIcon, Shield, KeyRound, LayoutDashboard } from "lucide-react";
