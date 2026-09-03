@@ -77,7 +77,7 @@ export async function getProductBySlug(slug: string): Promise<ApiResult<Product>
       reviews: true,
     },
     pagination: { pageSize: 1 },
-    filters: { name: { $eq: slugToName(slug) } },
+    filters: { name: { $eqi: slugToName(slug) } },
   };
 
   const res = await strapiFetch<StrapiData<Product[]>>("/products", { query });

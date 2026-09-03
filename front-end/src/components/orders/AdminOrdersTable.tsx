@@ -17,7 +17,7 @@ export function AdminOrdersTable({ orders }: { orders: { id: number; order: Orde
   const toast = useToast();
   const canUpdate = usePermission("order", "update");
   const [busyId, setBusyId] = useState<number | null>(null);
-  console.log("AdminOrdersTable orders:", orders);
+
 
   async function handleStatusChange(id: number, status: OrderStatus) {
     setBusyId(id);

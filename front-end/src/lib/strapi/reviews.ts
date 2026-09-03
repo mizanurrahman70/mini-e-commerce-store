@@ -29,6 +29,7 @@ export async function createReview(
       body: JSON.stringify({ data }),
     },
   });
+
   if (!res.ok || !res.body) {
     return { data: null, error: res.error ?? "Could not submit review" };
   }

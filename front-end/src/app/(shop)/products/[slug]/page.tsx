@@ -105,7 +105,7 @@ export default async function ProductDetailPage({
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
               Write a review
             </h3>
-            <ReviewForm productId={product.id} />
+            <ReviewForm productId={product.id} productPath={`/products/${slug}`} />
           </div>
 
           <div className="space-y-4">

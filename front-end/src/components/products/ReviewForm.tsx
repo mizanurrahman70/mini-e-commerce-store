@@ -5,6 +5,7 @@
 // server-side), with inline validation and a success toast.
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -12,8 +13,15 @@ import { createReviewAction } from "@/lib/actions/reviews";
 import { Button } from "@/components/ui/Button";
 import { Field, Textarea } from "@/components/ui/Input";
 
-export function ReviewForm({ productId }: { productId: number }) {
+export function ReviewForm({
+  productId,
+  productPath,
+}: {
+  productId: number;
+  productPath?: string;
+}) {
   const { user } = useAuth();
+  const router = useRouter();
   const toast = useToast();
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
@@ -39,6 +47,7 @@ export function ReviewForm({ productId }: { productId: number }) {
       product: productId,
       rating,
       comment: comment.trim(),
+      path: productPath,
     });
     setPending(false);
     if (result.error) {
@@ -47,6 +56,8 @@ export function ReviewForm({ productId }: { productId: number }) {
       toast.success("Thanks for your review!");
       setRating(0);
       setComment("");
+      // Re-run the server component so the new review shows up immediately.
+      router.refresh();
     }
   }
 
