@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_shared_order_items",
+  "info": {
+    "displayName": "order.item"
+  },
+  "options": {},
+  "attributes": {
+    "product": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product.product"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "priceAtOrder": {
+      "type": "decimal"
+    }
+  },
+  "config": {}
+}

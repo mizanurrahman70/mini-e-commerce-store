@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_shared_order_addresses",
+  "info": {
+    "displayName": "order.address"
+  },
+  "options": {},
+  "attributes": {
+    "street": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

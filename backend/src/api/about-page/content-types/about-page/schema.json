@@ -1,0 +1,43 @@
+{
+  "kind": "singleType",
+  "collectionName": "about_pages",
+  "info": {
+    "singularName": "about-page",
+    "pluralName": "about-pages",
+    "displayName": "AboutPage"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "heading": {
+      "type": "string"
+    },
+    "subheading": {
+      "type": "string"
+    },
+    "story": {
+      "type": "blocks"
+    },
+    "missionStatement": {
+      "type": "string"
+    },
+    "teamPhoto": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "yearFounded": {
+      "type": "integer"
+    },
+    "totalCustomers": {
+      "type": "integer"
+    }
+  }
+}
